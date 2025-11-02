@@ -1,0 +1,167 @@
+# AI-based NIDS Configuration File
+
+# Network monitoring settings
+network:
+  interface: null  # Auto-detect if null
+  promiscuous_mode: true
+  packet_buffer_size: 1000
+  capture_filter: ""
+  flow_timeout: 60.0
+  feature_window_size: 10.0
+
+# Machine learning settings
+ml:
+  model_directory: "data/models"
+  feature_directory: "data/features"
+  models:
+    random_forest:
+      enabled: true
+      n_estimators: 100
+      max_depth: 10
+      random_state: 42
+    isolation_forest:
+      enabled: true
+      contamination: 0.1
+      random_state: 42
+    one_class_svm:
+      enabled: true
+      kernel: "rbf"
+      gamma: "scale"
+      nu: 0.1
+  training:
+    test_size: 0.2
+    random_state: 42
+    cross_validation_folds: 5
+    retrain_interval_days: 7
+  detection:
+    confidence_threshold: 0.7
+    ensemble_voting: "majority"
+    feature_selection_k: 20
+
+# Alert system settings
+alerts:
+  enabled: true
+  priority_levels:
+    LOW: 0.6
+    MEDIUM: 0.7
+    HIGH: 0.8
+    CRITICAL: 0.9
+  rate_limiting:
+    enabled: true
+    max_alerts_per_minute: 10
+    burst_size: 5
+  correlation:
+    enabled: true
+    time_window: 300  # 5 minutes
+    similarity_threshold: 0.8
+  storage:
+    retention_days: 30
+    max_alerts: 10000
+
+# Notification settings
+notifications:
+  email:
+    enabled: false
+    smtp_server: "localhost"
+    smtp_port: 587
+    username: ""
+    password: ""
+    use_tls: true
+    from_address: "nids@example.com"
+    to_addresses: []
+  syslog:
+    enabled: true
+    facility: "local0"
+    address: "/dev/log"
+  webhook:
+    enabled: false
+    url: ""
+    timeout: 10
+    retry_attempts: 3
+  console:
+    enabled: true
+  file:
+    enabled: true
+    log_file: "data/logs/alerts.log"
+    rotation_size_mb: 100
+    backup_count: 5
+
+# Web interface settings
+web:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  secret_key: "change-this-in-production-use-secrets"
+  authentication:
+    enabled: false
+    username: "admin"
+    password: "admin123"
+    session_timeout: 3600
+  websocket:
+    enabled: true
+    port: 5001
+  static_files:
+    cache_timeout: 3600
+
+# Database settings
+database:
+  type: "sqlite"
+  path: "data/nids.db"
+  backup:
+    enabled: true
+    interval_hours: 24
+    retention_days: 7
+
+# Logging settings
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "data/logs/nids.log"
+  max_size_mb: 100
+  backup_count: 5
+  console: true
+  structured: true
+  compress: true
+
+# Security settings
+security:
+  max_login_attempts: 3
+  lockout_duration: 300
+  allowed_ips: []
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+
+# Performance settings
+performance:
+  max_concurrent_flows: 10000
+  cleanup_interval: 60
+  batch_size: 100
+  memory_limit_mb: 1024
+
+# Internal network ranges
+internal_networks:
+  - "10.0.0.0/8"
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"
+  - "127.0.0.0/8"
+
+# Known attack signatures
+signatures:
+  port_scan:
+    enabled: true
+    threshold_ports: 10
+    time_window: 60
+  syn_flood:
+    enabled: true
+    threshold_packets: 100
+    time_window: 10
+  dns_amplification:
+    enabled: true
+    threshold_queries: 50
+    time_window: 60
+  ssh_brute_force:
+    enabled: true
+    threshold_attempts: 5
+    time_window: 300

@@ -393,10 +393,10 @@ class ConsoleNotificationHandler(BaseNotificationHandler):
 
 {self.colors['BOLD']}Priority:{self.colors['END']} {priority_color}{alert.priority.value}{self.colors['END']}
 {self.colors['BOLD']}Attack Type:{self.colors['END']} {alert.attack_type.upper()}
-{self.colors['BOLD'}Source IP:{self.colors['END']} {alert.source_ip}
-{self.colors['BOLD'}Target IP:{self.colors['END']} {alert.target_ip or 'N/A'}
-{self.colors['BOLD'}Confidence:{self.colors['END']} {alert.confidence:.2%}
-{self.colors['BOLD'}Time:{self.colors['END']} {timestamp}
+{self.colors['BOLD']}Source IP:{self.colors['END']} {alert.source_ip}
+{self.colors['BOLD']}Target IP:{self.colors['END']} {alert.target_ip or 'N/A'}
+{self.colors['BOLD']}Confidence:{self.colors['END']} {alert.confidence:.2%}
+{self.colors['BOLD']}Time:{self.colors['END']} {timestamp}
 {self.colors['BOLD']}Alert ID:{self.colors['END']} {alert.id}
 
 {self.colors['BOLD']}Details:{self.colors['END']}

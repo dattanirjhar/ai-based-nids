@@ -270,7 +270,7 @@ if PYDANTIC_AVAILABLE:
         alert_rate_limiting: bool = True
         max_alerts_per_minute: int = Field(ge=1, le=1000)
         retention_days: int = Field(ge=1, le=365)
-        log_level: str = Field(regex="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
+        log_level: str = Field(pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
 
     class APIResponse(BaseModel):
         """Generic API response model"""

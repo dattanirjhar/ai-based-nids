@@ -1,37 +1,37 @@
 # AI-based Network Intrusion Detection System
 
-🛡️ A comprehensive AI-powered Network Intrusion Detection System (NIDS) that bridges the gap between signature-based and anomaly-based detection approaches.
+A comprehensive AI-powered Network Intrusion Detection System (NIDS) that bridges the gap between signature-based and anomaly-based detection approaches.
 
 ![NIDS Dashboard](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.9+-blue) ![Docker](https://img.shields.io/badge/Docker-Ready-blue) ![License](https://img.shields.io/badge/License-MIT-green)
 
-## 🎯 Overview
+## Overview
 
 The AI-based NIDS monitors live network traffic on a single machine, analyzes patterns using machine learning, and triggers alerts for potential threats. It combines traditional signature-based detection with advanced anomaly detection to provide comprehensive network security monitoring.
 
 ### Key Features
 
-✅ **Live Traffic Monitoring & Anomaly Detection**
+ **Live Traffic Monitoring & Anomaly Detection**
 - Real-time packet capture using Scapy
 - ML-powered anomaly detection with multiple algorithms
 - Configurable sensitivity thresholds
 
-✅ **Alert System for Potential Threats**
+ **Alert System for Potential Threats**
 - Multi-channel notifications (Email, Syslog, Webhook, Console)
 - Alert correlation and deduplication
 - Real-time alert visualization
 
-✅ **Interactive Dashboard**
+ **Interactive Dashboard**
 - Real-time traffic monitoring charts
 - Attack statistics and threat visualization
 - System resource monitoring
 - Cyberpunk-themed security operations center interface
 
-✅ **Hybrid Detection Approach**
+ **Hybrid Detection Approach**
 - Signature-based detection for known threats
 - ML-based detection for zero-day threats
 - Ensemble voting for improved accuracy
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ai-based-nids/
@@ -69,7 +69,7 @@ ai-based-nids/
 └── README.md                   # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -121,7 +121,7 @@ ai-based-nids/
 3. **Access the dashboard**
    Navigate to: http://localhost:5000
 
-## ⚙️ Configuration
+## Configuration
 
 The system uses YAML-based configuration files. Create `config/settings.yaml` to customize:
 
@@ -153,7 +153,7 @@ web:
   debug: false
 ```
 
-## 🎨 Dashboard Features
+## Dashboard Features
 
 ### Real-time Monitoring
 - **Live Traffic Monitor**: Real-time packet capture visualization
@@ -173,7 +173,7 @@ web:
 - **Priority Levels**: LOW, MEDIUM, HIGH, CRITICAL
 - **Alert Actions**: Acknowledge, resolve, investigate
 
-## 🧠 Machine Learning Pipeline
+## Machine Learning Pipeline
 
 ### Supported Algorithms
 - **Random Forest**: Primary classification model
@@ -193,7 +193,7 @@ web:
 - Performance metrics tracking
 - Model versioning with A/B testing
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### System Status
 - `GET /api/health` - System health check
@@ -216,7 +216,7 @@ web:
 - `GET /api/ml/anomalies` - Recent detections
 - `POST /api/ml/train` - Train models
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ### Multi-Container Architecture
 - **nids**: Main NIDS application
@@ -255,7 +255,7 @@ NIDS_WEB_PORT=5000
 NIDS_DB_PATH=/app/data/nids.db
 ```
 
-## 🔍 Testing
+## Testing
 
 ### Unit Tests
 ```bash
@@ -290,7 +290,7 @@ docker-compose exec nids python -m pytest tests/ --cov=src
    - Verify alert filtering and search
    - Test responsive design
 
-## 📊 Performance Requirements
+## Performance Requirements
 
 ### System Requirements
 - **CPU**: 2+ cores for real-time processing
@@ -305,7 +305,7 @@ docker-compose exec nids python -m pytest tests/ --cov=src
 - **System Uptime**: >99.9% availability
 - **Dashboard Response**: <2 second page load times
 
-## 🔒 Security Considerations
+## Security Considerations
 
 ### Deployment Security
 - Run containers as non-root user
@@ -321,7 +321,7 @@ docker-compose exec nids python -m pytest tests/ --cov=src
 - Secure API key management
 - GDPR compliance considerations
 
-## 🛠️ Advanced Configuration
+## Advanced Configuration
 
 ### Custom Signatures
 Add custom detection rules in `config/signatures.json`:
@@ -374,7 +374,7 @@ notifications:
     url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -388,11 +388,11 @@ notifications:
 - Update documentation for new functionality
 - Ensure all tests pass before submitting
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 ### Troubleshooting
 
@@ -421,12 +421,12 @@ docker-compose restart nids
 
 ### Getting Help
 
-- 📖 [Documentation](https://docs.example.com/nids)
-- 🐛 [Issues](https://github.com/yourorg/ai-based-nids/issues)
-- 💬 [Discussions](https://github.com/yourorg/ai-based-nids/discussions)
-- 📧 [Email Support](mailto:support@example.com)
+- [Documentation](https://docs.example.com/nids)
+- [Issues](https://github.com/yourorg/ai-based-nids/issues)
+- [Discussions](https://github.com/yourorg/ai-based-nids/discussions)
+- [Email Support](mailto:support@example.com)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Based on concepts from [vicky60629/Network-Intrusion-Detection-System](https://github.com/vicky60629/Network-Intrusion-Detection-System)
 - Built with Scapy, Scikit-learn, Flask, and modern web technologies

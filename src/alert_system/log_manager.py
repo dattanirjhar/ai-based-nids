@@ -83,7 +83,7 @@ class NIDSLogHandler(logging.handlers.RotatingFileHandler):
     """Custom log handler with enhanced rotation and compression"""
 
     def __init__(self, filename, max_bytes=100*1024*1024, backup_count=5, encoding='utf8', compress=True):
-        super().__init__(filename, max_bytes=max_bytes, backupCount=backup_count, encoding=encoding)
+        super().__init__(filename, maxBytes=max_bytes, backupCount=backup_count, encoding=encoding)
         self.compress = compress
 
     def doRollover(self):
