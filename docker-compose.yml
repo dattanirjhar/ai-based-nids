@@ -1,0 +1,308 @@
+version: '3.8'
+
+# AI-based Network Intrusion Detection System Docker Compose Configuration
+# This file defines the complete NIDS deployment with all required services
+
+services:
+  # Main NIDS Application
+  nids:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ai-nids
+    restart: unless-stopped
+    privileged: true  # Required for packet capture
+    network_mode: host  # Required for network monitoring
+    pid: host  # Required for process monitoring
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      # Data persistence
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/data/logs
+      # System directories for monitoring
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - NIDS_ENV=production
+      - NIDS_CONFIG_FILE=/app/config/settings.yaml
+      - NIDS_LOG_FILE=/app/data/logs/nids.log
+      - NIDS_DATA_DIR=/app/data
+      - NIDS_MODEL_DIR=/app/data/models
+      - PYTHONPATH=/app/src
+      - TZ=UTC
+    ports:
+      - "5000:5000"   # Web interface
+      - "5001:5001"   # WebSocket server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - redis
+      - elasticsearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Redis for alert queuing and caching
+  redis:
+    image: redis:7-alpine
+    container_name: nids-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # Elasticsearch for log aggregation and search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: nids-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./docker/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # Kibana for log visualization (optional)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: nids-kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # Prometheus for metrics collection (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nids-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # Grafana for metrics visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nids-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: nids-nginx
+    restart: unless-stopped
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - nids
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+# Volume definitions for data persistence
+volumes:
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# Network definitions
+networks:
+  default:
+    name: nids-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Development override
+---
+version: '3.8'
+
+services:
+  nids-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: ai-nids-dev
+    restart: "no"
+    privileged: true
+    network_mode: host
+    pid: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - .:/app
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - NIDS_ENV=development
+      - NIDS_DEBUG=true
+      - NIDS_LOG_LEVEL=DEBUG
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONPATH=/app/src
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      - redis-dev
+      - elasticsearch-dev
+    profiles:
+      - dev
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: nids-redis-dev
+    restart: "no"
+    ports:
+      - "6379:6379"
+    profiles:
+      - dev
+
+  elasticsearch-dev:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: nids-elasticsearch-dev
+    restart: "no"
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    profiles:
+      - dev
+
+# Testing override
+---
+version: '3.8'
+
+services:
+  nids-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: testing
+    container_name: ai-nids-test
+    volumes:
+      - .:/app
+    environment:
+      - NIDS_ENV=testing
+      - PYTHONPATH=/app/src
+    profiles:
+      - test

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-based NIDS - Network Intrusion Detection System</title>
+
+    <!-- External Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <!-- Meta Tags -->
+    <meta name="description" content="AI-based Network Intrusion Detection System Dashboard">
+    <meta name="keywords" content="NIDS, cybersecurity, network security, AI, machine learning">
+    <meta name="author" content="AI-based NIDS Team">
+</head>
+<body class="cyberpunk-bg">
+    <!-- Animated Matrix Background -->
+    <div class="matrix-rain"></div>
+
+    <!-- Header Navigation -->
+    <header class="nav-header">
+        <nav class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">[NIDS]</span>
+                <span class="brand-status" id="systemStatus">ONLINE</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> DASHBOARD
+                </a>
+                <a href="#alerts" class="nav-link" data-section="alerts">
+                    <i class="fas fa-exclamation-triangle"></i> ALERTS
+                </a>
+                <a href="#network" class="nav-link" data-section="network">
+                    <i class="fas fa-network-wired"></i> NETWORK
+                </a>
+                <a href="#models" class="nav-link" data-section="models">
+                    <i class="fas fa-brain"></i> MODELS
+                </a>
+                <a href="#settings" class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i> SETTINGS
+                </a>
+            </div>
+            <div class="nav-status">
+                <span class="status-indicator online" id="connectionIndicator"></span>
+                <span class="status-text" id="connectionStatus">CONNECTED</span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+        <!-- Top Stats Bar -->
+        <section class="stats-bar" id="statsBar">
+            <div class="stat-card">
+                <div class="stat-icon">📡</div>
+                <div class="stat-content">
+                    <div class="stat-label">PACKETS/SEC</div>
+                    <div class="stat-value" id="packetsPerSec">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                    <div class="stat-label">ACTIVE ALERTS</div>
+                    <div class="stat-value danger" id="activeAlerts">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-content">
+                    <div class="stat-label">THREATS BLOCKED</div>
+                    <div class="stat-value success" id="threatsBlocked">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧠</div>
+                <div class="stat-content">
+                    <div class="stat-label">ML ACCURACY</div>
+                    <div class="stat-value" id="mlAccuracy">0%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content" id="dashboardContent">
+            <!-- Left Column -->
+            <div class="dashboard-column left">
+                <!-- Live Traffic Monitor -->
+                <section class="panel traffic-monitor">
+                    <div class="panel-header">
+                        <h3 class="panel-title">LIVE TRAFFIC MONITOR</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn active" id="trafficToggle" title="Pause/Resume">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button class="control-btn" id="trafficSettings" title="Settings">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="trafficChart" class="chart-canvas"></canvas>
+                        <div class="traffic-stats">
+                            <div class="traffic-stat">
+                                <span class="stat-label">INBOUND</span>
+                                <span class="stat-value inbound" id="inboundTraffic">0 MB/s</span>
+                            </div>
+                            <div class="traffic-stat">
+                                <span class="stat-label">OUTBOUND</span>
+                                <span class="stat-value outbound" id="outboundTraffic">0 MB/s</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Alert Timeline -->
+                <section class="panel alert-timeline">
+                    <div class="panel-header">
+                        <h3 class="panel-title">ALERT TIMELINE</h3>
+                        <div class="alert-filter">
+                            <select class="filter-select" id="alertFilter">
+                                <option value="all">ALL ALERTS</option>
+                                <option value="critical">CRITICAL</option>
+                                <option value="high">HIGH</option>
+                                <option value="medium">MEDIUM</option>
+                                <option value="low">LOW</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="timeline-container" id="alertTimeline">
+                            <div class="timeline-placeholder">
+                                <i class="fas fa-shield-alt"></i>
+                                <p>No alerts yet. System is monitoring...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Center Column -->
+            <div class="dashboard-column center">
+                <!-- Network Topology -->
+                <section class="panel network-map">
+                    <div class="panel-header">
+                        <h3 class="panel-title">NETWORK TOPOLOGY</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" id="topologyRefresh" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="control-btn" id="topologyExpand" title="Expand">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="network-visualization" id="networkViz">
+                            <canvas id="networkChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Threat Detection Console -->
+                <section class="panel threat-console">
+                    <div class="panel-header">
+                        <h3 class="panel-title">THREAT DETECTION CONSOLE</h3>
+                        <div class="panel-status">
+                            <span class="status-indicator active" id="detectionStatus"></span>
+                            <span class="status-text">SCANNING</span>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-title">NIDS TERMINAL v2.0.1</span>
+                                <div class="terminal-controls">
+                                    <span class="terminal-control minimize">━</span>
+                                    <span class="terminal-control maximize">□</span>
+                                    <span class="terminal-control close">✕</span>
+                                </div>
+                            </div>
+                            <div class="terminal-body" id="terminalOutput">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-text">Initializing NIDS...</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-text">Loading ML models...</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-text success">[OK] All systems operational</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="dashboard-column right">
+                <!-- Attack Statistics -->
+                <section class="panel attack-stats">
+                    <div class="panel-header">
+                        <h3 class="panel-title">ATTACK STATISTICS</h3>
+                        <div class="time-range">
+                            <button class="range-btn active" data-range="24h">24H</button>
+                            <button class="range-btn" data-range="7d">7D</button>
+                            <button class="range-btn" data-range="30d">30D</button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <canvas id="attackChart" class="chart-canvas"></canvas>
+                        <div class="attack-types">
+                            <div class="attack-type">
+                                <div class="attack-label">PORT SCAN</div>
+                                <div class="attack-bar">
+                                    <div class="attack-fill port-scan" style="width: 0%"></div>
+                                </div>
+                                <div class="attack-count" id="portScanCount">0</div>
+                            </div>
+                            <div class="attack-type">
+                                <div class="attack-label">DOS ATTACK</div>
+                                <div class="attack-bar">
+                                    <div class="attack-fill dos" style="width: 0%"></div>
+                                </div>
+                                <div class="attack-count" id="dosCount">0</div>
+                            </div>
+                            <div class="attack-type">
+                                <div class="attack-label">BRUTE FORCE</div>
+                                <div class="attack-bar">
+                                    <div class="attack-fill brute-force" style="width: 0%"></div>
+                                </div>
+                                <div class="attack-count" id="bruteForceCount">0</div>
+                            </div>
+                            <div class="attack-type">
+                                <div class="attack-label">ANOMALY</div>
+                                <div class="attack-bar">
+                                    <div class="attack-fill anomaly" style="width: 0%"></div>
+                                </div>
+                                <div class="attack-count" id="anomalyCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- System Resources -->
+                <section class="panel system-resources">
+                    <div class="panel-header">
+                        <h3 class="panel-title">SYSTEM RESOURCES</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="resource-item">
+                            <div class="resource-label">CPU USAGE</div>
+                            <div class="resource-bar">
+                                <div class="resource-fill cpu" style="width: 0%"></div>
+                            </div>
+                            <div class="resource-value" id="cpuUsage">0%</div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-label">MEMORY</div>
+                            <div class="resource-bar">
+                                <div class="resource-fill memory" style="width: 0%"></div>
+                            </div>
+                            <div class="resource-value" id="memoryUsage">0%</div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-label">NETWORK I/O</div>
+                            <div class="resource-bar">
+                                <div class="resource-fill network" style="width: 0%"></div>
+                            </div>
+                            <div class="resource-value" id="networkUsage">0%</div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-label">DISK I/O</div>
+                            <div class="resource-bar">
+                                <div class="resource-fill disk" style="width: 0%"></div>
+                            </div>
+                            <div class="resource-value" id="diskUsage">0%</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alert Modal (overlay) -->
+    <div class="alert-modal" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-header critical">
+                <h3 class="modal-title">🚨 CRITICAL THREAT DETECTED</h3>
+                <button class="modal-close" onclick="closeAlertModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-details">
+                    <div class="alert-detail">
+                        <span class="detail-label">Attack Type:</span>
+                        <span class="detail-value" id="modalAttackType">Port Scan Attack</span>
+                    </div>
+                    <div class="alert-detail">
+                        <span class="detail-label">Source IP:</span>
+                        <span class="detail-value danger" id="modalSourceIP">192.168.1.247</span>
+                    </div>
+                    <div class="alert-detail">
+                        <span class="detail-label">Confidence:</span>
+                        <span class="detail-value" id="modalConfidence">94.7%</span>
+                    </div>
+                    <div class="alert-detail">
+                        <span class="detail-label">Timestamp:</span>
+                        <span class="detail-value" id="modalTimestamp">2024-01-01 14:32:17</span>
+                    </div>
+                </div>
+                <div class="alert-actions">
+                    <button class="action-btn primary" onclick="blockIP()">
+                        <i class="fas fa-ban"></i> BLOCK IP
+                    </button>
+                    <button class="action-btn secondary" onclick="investigateAlert()">
+                        <i class="fas fa-search"></i> INVESTIGATE
+                    </button>
+                    <button class="action-btn tertiary" onclick="dismissAlert()">
+                        <i class="fas fa-times"></i> DISMISS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Initializing NIDS...</p>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
