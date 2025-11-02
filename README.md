@@ -193,7 +193,7 @@ web:
 - Performance metrics tracking
 - Model versioning with A/B testing
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### System Status
 - `GET /api/health` - System health check
@@ -421,10 +421,10 @@ docker-compose restart nids
 
 ### Getting Help
 
-- 📖 [Documentation](https://docs.example.com/nids)
-- 🐛 [Issues](https://github.com/yourorg/ai-based-nids/issues)
-- 💬 [Discussions](https://github.com/yourorg/ai-based-nids/discussions)
-- 📧 [Email Support](mailto:support@example.com)
+- [Documentation](https://docs.example.com/nids)
+- [Issues](https://github.com/yourorg/ai-based-nids/issues)
+- [Discussions](https://github.com/yourorg/ai-based-nids/discussions)
+- [Email Support](mailto:support@example.com)
 
 ## Acknowledgments
 
